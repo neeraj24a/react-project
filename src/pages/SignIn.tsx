@@ -14,9 +14,9 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from './CustomIcons';
 import axios from 'axios';
-import { ACCESS_TOKEN, REFRESH_TOKEN, setItem } from '../utils/LocalStorage';
+import { ACCESS_TOKEN, REFRESH_TOKEN, useLocalStorage } from '../utils/LocalStorage';
 import { Alert } from '@mui/material';
-import { useAuth } from '../components/AuthProvider';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -52,7 +52,8 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 
 export default function SignIn() {
     const navigate = useNavigate();
-    const auth = useAuth();
+    // const auth = useAuth();
+    const { setAccessToken, setRefreshToken } = useAuth();
     const [emailError, setEmailError] = React.useState(false);
     const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
     const [loginError, setLoginError] = React.useState(false);
@@ -73,16 +74,21 @@ export default function SignIn() {
         return axios.post('https://api.escuelajs.co/api/v1/auth/login', credentials)
             .then(response => {
                 if (response.status === 201) {
+                    console.log(response);
                     const { access_token, refresh_token } = response.data;
-                    setItem(ACCESS_TOKEN, access_token);
-                    setItem(REFRESH_TOKEN, refresh_token);
+                    // setItem(ACCESS_TOKEN, access_token);
+                    // setItem(REFRESH_TOKEN, refresh_token);
                     setLoginError(false);
                     setLoginErrorMsg('');
                     setEmailError(false);
                     setPasswordError(false);
                     // updating auth context
-                    auth?.updateAccessToken();
-                    navigate("/products");
+                    // auth?.accessToken = access_token;
+                    // setAccessToken(access_token);
+                    // auth?.updateAccessToken();
+                    setAccessToken(access_token);
+                    setRefreshToken(refresh_token);
+                    navigate("/products", { replace: true });
                 }
             })
     }
